@@ -1,0 +1,8 @@
+spring:
+  data:
+    mongodb:
+      database: Car
+      host: datastore-service
+      port: 27017
+server:
+  port: 9001

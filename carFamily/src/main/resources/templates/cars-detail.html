@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace="~{fragments/header :: head}"></head>
+<body>
+<div class="container">
+    <div th:replace="~{fragments/banner :: banner}"></div>
+    <div class="table-responsive" th:switch="${cars}">
+        <h2 th:case="null">No Cars Found!</h2>
+        <div th:case="*">
+            <h2>Cars</h2>
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>Brand Name</th>
+                    <th>Parent Company</th>
+                    <th>Founded In</th>
+                    <th>HQ Country</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="car : ${cars}">
+                    <td th:text="${car.carBrand}"></td>
+                    <td th:text="${car.parentCompany}"></td>
+                    <td th:text="${car.yearOfOrigin}"></td>
+                    <td th:text="${car.country}"></td>
+                    <td><a class="btn btn-primary" th:href="@{/edit/{id}(id=${car.id})}">Update</a></td>
+                    <td><a class="btn btn-primary" th:href="@{/delete/{id}(id=${car.id})}">Delete</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</div>
+</body>
+</html>

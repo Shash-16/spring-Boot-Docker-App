@@ -1,0 +1,149 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cfapp-config
+  labels:
+    data: config
+data:
+  datastore_host: "datastore-service"
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: datastore-statefulset
+  labels:
+    app: datastore
+spec:
+  serviceName: "mongodb"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: datastore
+  template:
+    metadata:
+      labels:
+        app: datastore
+    spec:
+      containers:
+        - name: mongodb-container
+          image: mongo
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: datastore-data
+              mountPath: /data/db
+            - name: mongo-config
+              mountPath: /data/configdb
+  volumeClaimTemplates:
+    - metadata:
+        name: datastore-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 10Mi
+    - metadata:
+        name: mongo-config
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 5Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: datastore-service
+  labels:
+    app: datastore
+spec:
+  selector:
+    app: datastore
+  ports:
+    - protocol: TCP
+      port: 27017
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deployment
+  labels:
+    app: cfapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      containers:
+        - name: app-container
+          image: cfapp
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: WORKER_URI
+              value: http://worker-service:9001/api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-service
+  labels:
+    app: cfapp
+spec:
+  selector:
+    app: app
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-deployment
+  labels:
+    app: cfworker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      containers:
+        - name: worker-container
+          image: cfworker
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 9001
+          env:
+            - name: DATASTORE_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: cfapp-config
+                  key: datastore_host
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: worker-service
+  labels:
+    app: cfworker
+spec:
+  selector:
+    app: worker
+  ports:
+    - protocol: TCP
+      port: 9001
+      targetPort: 9001
+  type: LoadBalancer

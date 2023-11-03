@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head th:replace="~{fragments/header :: head}"></head>
+<body>
+<div class="container">
+    <div th:replace="~{fragments/banner :: banner}"></div>
+    <div class="alert alert-success">
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,23 @@
+version: "1.0"
+services:
+  app:
+    image: cfapp
+    ports:
+      - 8080:8080
+    environment:
+      - WORKER_URI=http://worker:9001/api
+
+  worker:
+    image: cfworker
+    ports:
+      - 9001:9001
+    links:
+      - datastore
+
+  datastore:
+    image: mongo
+    container_name: mongodb-container
+    restart: always
+    command: --quiet --syslog
+    expose:
+      - "27017"
