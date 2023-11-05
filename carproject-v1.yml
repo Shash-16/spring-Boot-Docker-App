@@ -81,8 +81,7 @@ spec:
     spec:
       containers:
         - name: app-container
-          image: cfapp
-          imagePullPolicy: Never
+          image: shashank16/cfapp
           ports:
             - containerPort: 8080
           env:
@@ -122,8 +121,7 @@ spec:
     spec:
       containers:
         - name: worker-container
-          image: cfworker
-          imagePullPolicy: Never
+          image: shashank16/cfworker
           ports:
             - containerPort: 9001
           env:
